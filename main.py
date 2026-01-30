@@ -92,57 +92,21 @@ def weddle_rule(f, a, b, n):
     return integral
 
 
-def test_function(x):
-    """Test function: sin(x)"""
+def f(x):
     return np.sin(x)
 
 a = 0
 b = np.pi
+
+print("Num integral sin(x) от 0 до π\n")
+
 n = 10
+print(f" Trapezoidal rule (n={n}):    {trapezoidal_rule(f, a, b, n):.10f}")
+print(f"Simpson's 1/3 Rule (n={n}):     {simpsons_one_third(f, a, b, n):.10f}")
 
-print("Integration of sin(x) from 0 to π")
-print("=================================")
-print(f"Number of intervals: {n}")
-print(f"Exact value (analytical): {2.0:.10f}")
-print(("================================="))
+n = 12
+print(f"Simpson's 3/8 Rule (n={n}):    {simpsons_three_eighth(f, a, b, n):.10f}")
+print(f"Boole's Rule (n={n}):             {booles_rule(f, a, b, n):.10f}")
+print(f"Weddle's Rule(n={n}):          {weddle_rule(f, a, b, n):.10f}")
 
-try:
-    result = newton_cotes(test_function, a, b, n)
-    print(f"Newton-Cotes:              {result:.10f}")
-except Exception as e:
-    print(f"Newton-Cotes:              Error - {e}")
-
-try:
-    result = trapezoidal_rule(test_function, a, b, n)
-    print(f"Trapezoidal Rule:          {result:.10f}")
-except Exception as e:
-    print(f"Trapezoidal Rule:          Error - {e}")
-
-try:
-    result = simpsons_one_third(test_function, a, b, n)
-    print(f"Simpson's 1/3 Rule:        {result:.10f}")
-except Exception as e:
-    print(f"Simpson's 1/3 Rule:        Error - {e}")
-
-try:
-    n_simp3 = 12  # Must be multiple of 3
-    result = simpsons_three_eighth(test_function, a, b, n_simp3)
-    print(f"Simpson's 3/8 Rule (n=12): {result:.10f}")
-except Exception as e:
-    print(f"Simpson's 3/8 Rule:        Error - {e}")
-
-try:
-    n_boole = 12  # Must be multiple of 4
-    result = booles_rule(test_function, a, b, n_boole)
-    print(f"Boole's Rule (n=12):       {result:.10f}")
-except Exception as e:
-    print(f"Boole's Rule:              Error - {e}")
-
-try:
-    n_weddle = 12  # Must be multiple of 6
-    result = weddle_rule(test_function, a, b, n_weddle)
-    print(f"Weddle's Rule (n=12):      {result:.10f}")
-except Exception as e:
-    print(f"Weddle's Rule:             Error - {e}")
-
-print("=================================")
+print(f"\nExact value: 2.0")
