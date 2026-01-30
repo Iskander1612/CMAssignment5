@@ -1,112 +1,97 @@
 import numpy as np
 
-# 1. Newton-Cotes Integration Formula (Closed, General n)
-def newton_cotes(f, a, b, n):
-    if n <= 0:
-        raise ValueError("n must be a positive integer")
-    
+def trapezoid(f, a, b, n):
     h = (b - a) / n
-    x = np.linspace(a, b, n + 1)
-    
-    # Simpson's weights for Newton-Cotes
-    weights = np.zeros(n + 1)
-    weights[0] = weights[-1] = 1
-    weights[1:-1] = 4 - 2 * (np.arange(1, n) % 2 == 0)
-    
-    integral = (h / 3) * np.sum(weights * f(x))
-    return integral
+    s = 0.0
 
-# 2. Trapezoidal Rule
-def trapezoidal_rule(f, a, b, n):
-    if n <= 0:
-        raise ValueError("n must be a positive integer")
-    
+    for i in range(1, n):
+        x = a + i*h
+        s += f(x)
+
+    return h * ( (f(a) + f(b)) / 2 + s )
+
+def simpson_13(f, a, b, n):
+    if n % 2 != 0:
+        raise ValueError("n must be even")
+
     h = (b - a) / n
-    x = np.linspace(a, b, n + 1)
-    integral = (h / 2) * (f(x[0]) + 2 * np.sum(f(x[1:-1])) + f(x[-1]))
-    
-    return integral
+    s1 = 0.0
+    s2 = 0.0
 
-# 3. Simpson's One-Third Rule
-def simpsons_one_third(f, a, b, n):
+    for i in range(1, n):
+        x = a + i*h
+        if i % 2 == 0:
+            s2 += f(x)
+        else:
+            s1 += f(x)
 
-    if n <= 0:
-        raise ValueError("n must be a positive integer")
-    if n % 2 == 1:
-        raise ValueError("n must be even for Simpson's 1/3 rule")
-    
-    h = (b - a) / n
-    x = np.linspace(a, b, n + 1)
-    integral = (h / 3) * (f(x[0]) + f(x[-1]) + 4 * np.sum(f(x[1:-1:2])) + 2 * np.sum(f(x[2:-1:2])))
-    
-    return integral
+    return (h/3) * (f(a) + f(b) + 4*s1 + 2*s2)
 
-# 4. Simpson's Three-Eighth Rule
-def simpsons_three_eighth(f, a, b, n):
-    if n <= 0:
-        raise ValueError("n must be a positive integer")
+def simpson_38(f, a, b, n):
     if n % 3 != 0:
-        raise ValueError("n must be a multiple of 3 for Simpson's 3/8 rule")
-    
-    h = (b - a) / n
-    x = np.linspace(a, b, n + 1)
-    
-    # Simpson's 3/8 formula: integral = (3h/8) * [f(x0) + 3*sum(f(x_{3k+1})) + 3*sum(f(x_{3k+2})) + 2*sum(f(x_{3k})) + f(xn)]
-    integral = (3 * h / 8) * (f(x[0]) + 3 * np.sum(f(x[1::3])) + 3 * np.sum(f(x[2::3])) + 2 * np.sum(f(x[3::3])) + f(x[-1]))
-    
-    return integral
+        raise ValueError("n must be divisible by 3")
 
-# 5. Boole's Rule
-def booles_rule(f, a, b, n):
-    if n <= 0:
-        raise ValueError("n must be a positive integer")
+    h = (b - a) / n
+    s3 = 0.0
+    s2 = 0.0
+
+    for i in range(1, n):
+        x = a + i*h
+        if i % 3 == 0:
+            s2 += f(x)
+        else:
+            s3 += f(x)
+
+    return (3*h/8) * (f(a) + f(b) + 3*s3 + 2*s2)
+
+def boole(f, a, b, n):
     if n % 4 != 0:
-        raise ValueError("n must be a multiple of 4 for Boole's rule")
-    
-    h = (b - a) / n
-    x = np.linspace(a, b, n + 1)
-    
-    # Boole's formula weights: 7, 32, 12, 32, 7 for 5-point rule
-    integral = (2 * h / 45) * (7 * f(x[0]) + 7 * f(x[-1]) + 
-                               32 * (np.sum(f(x[1::4])) + np.sum(f(x[3::4]))) + 
-                               12 * np.sum(f(x[2::4])))
-    
-    return integral
+        raise ValueError("n must be divisible by 4")
 
-# 6. Weddle's Rule
-def weddle_rule(f, a, b, n):
-    if n <= 0:
-        raise ValueError("n must be a positive integer")
+    h = (b - a) / n
+    s = 0.0
+
+    for i in range(0, n, 4):
+        x0 = a + i*h
+        s += (
+            7*f(x0)
+            + 32*f(x0 + h)
+            + 12*f(x0 + 2*h)
+            + 32*f(x0 + 3*h)
+            + 7*f(x0 + 4*h)
+        )
+
+    return (2*h/45) * s
+
+
+def weddle(f, a, b, n):
     if n % 6 != 0:
-        raise ValueError("n must be a multiple of 6 for Weddle's rule")
-    
+        raise ValueError("n must be divisible 6")
+
     h = (b - a) / n
-    x = np.linspace(a, b, n + 1)
-    
-    # Weddle's formula weights: 41, 216, 27, 272 for 7-point rule
-    integral = (3 * h / 10) * (f(x[0]) + f(x[-1]) + 
-                               5 * (np.sum(f(x[1::6])) + np.sum(f(x[5::6]))) + 
-                               np.sum(f(x[2::6])) + np.sum(f(x[4::6])) + 
-                               6 * np.sum(f(x[3::6])))
-    
-    return integral
+    s = 0.0
 
+    for i in range(0, n, 6):
+        x0 = a + i*h
+        s += (
+            f(x0)
+            + 5*f(x0 + h)
+            + f(x0 + 2*h)
+            + 6*f(x0 + 3*h)
+            + f(x0 + 4*h)
+            + 5*f(x0 + 5*h)
+            + f(x0 + 6*h)
+        )
 
-def f(x):
-    return np.sin(x)
+    return (3*h/10) * s
 
+f = lambda x: np.sin(x)
 a = 0
 b = np.pi
+n = 24
 
-print("Num integral sin(x) от 0 до π\n")
-
-n = 10
-print(f" Trapezoidal rule (n={n}):    {trapezoidal_rule(f, a, b, n):.10f}")
-print(f"Simpson's 1/3 Rule (n={n}):     {simpsons_one_third(f, a, b, n):.10f}")
-
-n = 12
-print(f"Simpson's 3/8 Rule (n={n}):    {simpsons_three_eighth(f, a, b, n):.10f}")
-print(f"Boole's Rule (n={n}):             {booles_rule(f, a, b, n):.10f}")
-print(f"Weddle's Rule(n={n}):          {weddle_rule(f, a, b, n):.10f}")
-
-print(f"\nExact value: 2.0")
+print("Trapezoid:", trapezoid(f, a, b, n))
+print("Simpson 1/3:", simpson_13(f, a, b, n))
+print("Simpson 3/8:", simpson_38(f, a, b, n))
+print("Boole:", boole(f, a, b, n))
+print("Weddle:", weddle(f, a, b, n))
